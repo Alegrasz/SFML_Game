@@ -2,20 +2,31 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "button.h"
+#include <utility>
+#include <vector>
 
 int level_1();
 void updateMovemnet();
+void ground_dectection();
+void jumpcounter();
+
+
 
 float WindowX = 800, WindowY = 600;
 
 sf::RenderWindow window(sf::VideoMode(WindowX, WindowY), "The Great Game");
 sf::Event event;
+
+
+
+/*---------------------- main ------------------------------------*/
+
 int main()
 {
     window.setFramerateLimit(60);
     enum PGame{mainScreen, level_01};
     //creates the window size and gives the window a name
-
+    //to creates the circle
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Blue);
     shape.setPosition(100,140);
@@ -28,42 +39,45 @@ int main()
 
         std::cout << "There is an error" << std::endl;
     }
+
     //This is used to set the position of the button
+
     float xPos = 300, yPos = 350;
+
+    // sets text with set variables
     text.setFont(font);
     text.setString("Play Game");
     text.setCharacterSize(40);
     text.setColor(sf::Color::Red);
     text.setPosition(xPos, yPos);
+
+    //sets title with set variables
     title.setFont(font);
     title.setString("The Great Game");
     title.setCharacterSize(60);
     title.setColor(sf::Color::Red);
     title.setPosition(150, 200);
+
     //end of the button creation
+
     bool MouseButtonPressed = false;
     while (window.isOpen())
     {
-        sf::Vector2i mouse = sf::Mouse::getPosition(window);
+       //this gets the coordinates of top left corner of the text
         float textCorY = text.getGlobalBounds().height;
         float textCorX = text.getGlobalBounds().width;
+
+        sf::Vector2i mouse = sf::Mouse::getPosition(window);
 
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            std::cout << "it works" << std::endl;
-        }
         // start of the Button
         // put all what is below in a class
         //on click
 
-        //Test of button
-
-        //end of test button
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             MouseButtonPressed = true;
@@ -74,9 +88,6 @@ int main()
                 {
                     std::cout << "The button works" <<std::endl;
                     text.setColor(sf::Color::Blue);
-                    //text.setPosition(100000, 100000);
-                    //title.setPosition(100000, 100000);
-                    //shape.setPosition(100000, 100000);
                     level_1();
                 }
 
@@ -119,20 +130,36 @@ int main()
 
 }
 
-    float moveX = 200, moveY = 400;
-    float velocityX = 0, velocityY = 0;
-    float accelerationX = 0, accelerationY = 0;
+// all the variables for every level
+
+    float moveX = 200, moveY = 400; //sets the position
+    float velocityX = 0, velocityY = 0; // sets the velocity
+    float accelerationX = 0, accelerationY = 0; // sets the acceleration
 
     float gravity = 1;
 
-    float boxSetX = 0, boxSetY = 500;
+    float boxSetX = 100, boxSetY = 500; // sets the position of the box
+
+    float characterBottom;
+
+    float jumpcount = 0;
+
+    const float jumped = 1;
+
+    bool isJumping = false;
+    bool MAX_Jump = false;
+
+    std::vector <float> ground;
+    std::vector <float>::iterator it;
+
+    bool touchground = true;
+
+
+/*------------------------ level 1 -------------------------------*/
 
 int level_1()
 {
 
-
-
-    bool isJumping = false;
 
     sf::Vector2f velocity(sf::Vector2f(0,0));
 
@@ -145,15 +172,11 @@ int level_1()
     rect.setFillColor(sf::Color::White);
     rect.setPosition(boxSetX, boxSetY);
 
-
-
     while(window.isOpen())
     {
     // all the set variables
 
     bool isButtonPressed = false;
-
-
 
     float characterPosX = character.getPosition().x;
     float characterPosY = character.getPosition().y;
@@ -161,12 +184,24 @@ int level_1()
     float sizeofCharX = character.getGlobalBounds().width;
     float sizeofCharY = character.getGlobalBounds().height;
 
+     characterBottom = sizeofCharY + characterPosY;
+
+     //std::cout << characterBottom <<std::endl;
+
+
+    //std::cout << characterBottom << std::endl;
+
    // std::cout <<"Char Position in X: " << characterPosX << " Char Position in Y: " << characterPosY << std::endl;
-    std::cout << "Size of character in X: " << sizeofCharX << " Size of character Y: " << sizeofCharY << std::endl;
+    //std::cout << "Size of character in X: " << sizeofCharX << " Size of character Y: " << sizeofCharY << std::endl;
 
     float boxPosX = rect.getGlobalBounds().width;
+
     float boxPosY = rect.getGlobalBounds().height;
+
     //std::cout << boxPosX << " " << boxPosY << std::endl;
+
+    // to get the position of the mouse
+    sf::Vector2i d_mouse = sf::Mouse::getPosition(window);
 
     //end of all variables
 
@@ -177,24 +212,48 @@ int level_1()
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+            // the jumping mechanism
+            if((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) && MAX_Jump == false)
             {
                 velocityY = -20;
+                jumpcount += 0;
+                isJumping = true;
+                touchground = false;
+                std::cout << isJumping << std::endl;
+
             }
+            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            {
+                window.close();
+            }
+
         }
+
+        //std::cout << d_mouse.x << " " << d_mouse.y << std::endl;
 
         //The usable buttons here
 
         bool button = false;
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) )
+        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::D) )
         {
-            velocityX = 8;
+            velocityX = 0;
             button = true;
         }
+        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::A) )
+        {
+            velocityX = 0;
+            button = true;
+        }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) )
+        {
+            velocityX = 4;
+            button = true;
+        }
+
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
-            velocityX = -8;
+            velocityX = -4;
             button = true;
 
         }
@@ -210,10 +269,9 @@ int level_1()
 
         //setting a ground
 
-
+        ground_dectection();
 
         //end of ground
-
         updateMovemnet();
         character.setPosition(moveX, moveY);
         //gravity(character);
@@ -226,18 +284,68 @@ int level_1()
     return 0;
 }
 
-
-
 void updateMovemnet()
 {
      if(moveY < boxSetY )                  //If you are above ground
         velocityY += gravity;    //Add gravity
-    else if(moveY > boxSetY)             //If you are below ground
+     else if(moveY > boxSetY)             //If you are below ground
         moveY = 500;
-
+    jumpcounter();
     velocityX += accelerationX;
     velocityY += accelerationY;
 
+    //std::cout << boxSetY << " " << moveY << std::endl;
+
     moveX += velocityX;
     moveY += velocityY;
+
+
 }
+
+void ground_dectection()
+{
+
+}
+
+void jumpcounter()
+{
+    //std::cout << "how many jumps has it done: " << jumpcount <<std::endl;
+
+    // gets jump count 1 from spacebar
+
+    float num = 500.f;
+
+
+    if(jumpcount == 0)
+    {
+                MAX_Jump =  true;
+
+
+                    if(num == moveY)
+                    {
+                        isJumping = false;
+                        touchground = true;
+                        MAX_Jump = false;
+                    }
+
+                std::cout << isJumping << " " << touchground << std::endl;
+
+                if( touchground == true && isJumping == false)
+                {
+                            std::cout << "Yaaaaaaay" << std::endl;
+                            jumpcount = 0;
+                }
+    }
+}
+
+
+class shooting{
+
+public:
+
+    void fire()
+    {
+
+    }
+
+};
