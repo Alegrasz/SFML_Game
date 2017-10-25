@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <SFML/Graphics.hpp>
-#include "button.h"
 #include <utility>
 #include <vector>
 
@@ -16,6 +15,58 @@ float WindowX = 800, WindowY = 600;
 
 sf::RenderWindow window(sf::VideoMode(WindowX, WindowY), "The Great Game");
 sf::Event event;
+
+// Note: find out how let objects inherit gravity
+
+class button
+{
+public:
+    void Button()
+    {
+
+    }
+};
+
+class object : public button
+{
+public:
+    void box(float SetPosX, float SetPosY , float sizeX, float sizeY, int R, int G, int B)
+    {
+        sf::RectangleShape rectan;
+        rectan.setPosition(SetPosX, SetPosY);
+        rectan.setSize(sf::Vector2f(sizeX, sizeY));
+        rectan.setFillColor(sf::Color(R, G, B));
+        window.draw(rectan);
+    }
+
+    void circle(float SetPosX, float SetPosY, float Radius, float SizeY, int R, int G, int B)
+    {
+        sf::CircleShape circle;
+        circle.setPosition(SetPosX, SetPosY);
+        circle.setRadius(Radius);
+        circle.setFillColor(sf::Color(R, G, B));
+        window.draw(circle);
+    }
+
+    void text(std::string TTF, unsigned int TextSize,float SetPosX, float SetPosY, int R, int G, int B)
+    {
+        sf::Font font;
+        sf::Text text;
+
+        if(!font.loadFromFile(TTF))
+        {
+            std::cout << "error: " << TTF << " could not be found" << std::endl;
+        }
+
+        text.setFont(font);
+        text.setCharacterSize(TextSize);
+        text.setPosition(SetPosX, SetPosY);
+        text.setFillColor(sf::Color(R, G, B));
+        window.draw(text);
+    }
+};
+
+
 
 
 
@@ -172,6 +223,9 @@ int level_1()
     rect.setFillColor(sf::Color::White);
     rect.setPosition(boxSetX, boxSetY);
 
+    object *boxA;
+    object *boxB;
+
     while(window.isOpen())
     {
     // all the set variables
@@ -275,7 +329,10 @@ int level_1()
         updateMovemnet();
         character.setPosition(moveX, moveY);
         //gravity(character);
+
         window.clear();
+        boxA->box(50, 100, 800, 200, 244, 200, 155);
+        boxB->box(50, 200, 800, 200, 45, 155, 130);
         window.draw(character);
         //window.draw(rect);
         window.display();
@@ -294,7 +351,7 @@ void updateMovemnet()
     velocityX += accelerationX;
     velocityY += accelerationY;
 
-    //std::cout << boxSetY << " " << moveY << std::endl;
+    std::cout << boxSetY << " " << moveY << std::endl;
 
     moveX += velocityX;
     moveY += velocityY;
@@ -328,16 +385,16 @@ void jumpcounter()
                         MAX_Jump = false;
                     }
 
-                std::cout << isJumping << " " << touchground << std::endl;
+                //std::cout << isJumping << " " << touchground << std::endl;
 
                 if( touchground == true && isJumping == false)
                 {
                             std::cout << "Yaaaaaaay" << std::endl;
                             jumpcount = 0;
+
                 }
     }
 }
-
 
 class shooting{
 
