@@ -178,7 +178,6 @@ int main()
     }
 
     return 0;
-
 }
 
 // all the variables for every level
@@ -199,6 +198,9 @@ int main()
 
     bool isJumping = false;
     bool MAX_Jump = false;
+    sf::RectangleShape rect;
+    float BoxPosX;
+    float BoxPosY;
 
     std::vector <float> ground;
     std::vector <float>::iterator it;
@@ -218,13 +220,15 @@ int level_1()
     character.setFillColor(sf::Color::Red);
     character.setPosition(moveX, moveY);
 
-    sf::RectangleShape rect;
+
     rect.setSize(sf::Vector2f(1000, 200));
     rect.setFillColor(sf::Color::White);
     rect.setPosition(boxSetX, boxSetY);
 
+
     object *boxA;
     object *boxB;
+    object *boxC;
 
     while(window.isOpen())
     {
@@ -234,6 +238,10 @@ int level_1()
 
     float characterPosX = character.getPosition().x;
     float characterPosY = character.getPosition().y;
+
+    BoxPosX =  rect.getPosition().x;
+    BoxPosY = rect.getPosition().y;
+
 
     float sizeofCharX = character.getGlobalBounds().width;
     float sizeofCharY = character.getGlobalBounds().height;
@@ -248,11 +256,13 @@ int level_1()
    // std::cout <<"Char Position in X: " << characterPosX << " Char Position in Y: " << characterPosY << std::endl;
     //std::cout << "Size of character in X: " << sizeofCharX << " Size of character Y: " << sizeofCharY << std::endl;
 
-    float boxPosX = rect.getGlobalBounds().width;
+    float boxPosX = rect.getLocalBounds().width;
 
-    float boxPosY = rect.getGlobalBounds().height;
+    float boxPosY = rect.getLocalBounds().height;
 
-    //std::cout << boxPosX << " " << boxPosY << std::endl;
+
+
+    std::cout << BoxPosX << " " << BoxPosY << std::endl;
 
     // to get the position of the mouse
     sf::Vector2i d_mouse = sf::Mouse::getPosition(window);
@@ -311,10 +321,6 @@ int level_1()
             button = true;
 
         }
-        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::A) && (button == true))
-        {
-                button = false;
-        }
         /*if((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::S)))
         {
             velocityY = -2;
@@ -331,8 +337,9 @@ int level_1()
         //gravity(character);
 
         window.clear();
-        boxA->box(50, 100, 800, 200, 244, 200, 155);
-        boxB->box(50, 200, 800, 200, 45, 155, 130);
+        boxA->box(0, 0, 800, 600, 244, 200, 155);   // tan
+        boxB->box(0, 500, 800, 200, 45, 155, 130);  // dark green
+        boxC->box(0, 575, 800, 200, 45, 190, 130);  // bright green
         window.draw(character);
         //window.draw(rect);
         window.display();
@@ -343,18 +350,22 @@ int level_1()
 
 void updateMovemnet()
 {
-     if(moveY < boxSetY )                  //If you are above ground
-        velocityY += gravity;    //Add gravity
-     else if(moveY > boxSetY)             //If you are below ground
-        moveY = 500;
+
     jumpcounter();
     velocityX += accelerationX;
     velocityY += accelerationY;
 
-    std::cout << boxSetY << " " << moveY << std::endl;
+
 
     moveX += velocityX;
     moveY += velocityY;
+
+    if(moveY < BoxPosY )                  //If you are above ground
+        velocityY += gravity;    //Add gravity
+     else if(moveY > BoxPosY)             //If you are below ground
+        moveY = 500;
+
+    std::cout << boxSetY << " " << moveY << std::endl;
 
 
 }
