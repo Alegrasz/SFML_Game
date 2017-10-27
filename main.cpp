@@ -4,10 +4,26 @@
 #include <utility>
 #include <vector>
 
+/*------------------ All main windows for the game --------------------
+*   --Note: use CTRL + F then type the name that you want to go too
+*
+*   * int main
+*   * title window
+*   * level 1
+*   * level 2 --empty/testing
+*
+*------------------- All main windows above ---------------------------*/
+
+
+/*--------------- all the functions available are below ---------------*/
+
+int level_2();
 int level_1();
 void updateMovemnet();
 void ground_dectection();
 void jumpcounter();
+
+/*--------------- all the functions available are above ---------------*/
 
 
 
@@ -16,18 +32,32 @@ float WindowX = 800, WindowY = 600;
 sf::RenderWindow window(sf::VideoMode(WindowX, WindowY), "The Great Game");
 sf::Event event;
 
-// Note: find out how let objects inherit gravity
+// Note: find out how to make objects to inherit gravity
 
-class button
+class detection
 {
 public:
-    void Button()
+    bool triggerBox(float ObjPosX, float ObjPosY, float triggerTopX, float triggerTopY, float triggerBottomX, float triggerBottomY)
     {
-
+        bool Triggered;
+        // it checks if the object is within the set boundaries of the player or object
+        if((ObjPosX > triggerTopX && ObjPosY > triggerTopY) && (triggerBottomX > ObjPosX && triggerBottomY > ObjPosY))
+        {
+            Triggered = true;
+            std::cout << Triggered << std::endl;
+            return Triggered;
+        }
+/*---- Note ----*/ // it checks if the object or player is not within the boundary
+        if(!((ObjPosX > triggerTopX && ObjPosY > triggerTopY) && (triggerBottomX > ObjPosX && triggerBottomY > ObjPosY)))
+        {
+            Triggered = false;
+            std::cout << Triggered << std::endl;
+            return Triggered;
+        }
     }
 };
 
-class object : public button
+class object
 {
 public:
     void box(float SetPosX, float SetPosY , float sizeX, float sizeY, int R, int G, int B)
@@ -39,7 +69,7 @@ public:
         window.draw(rectan);
     }
 
-    void circle(float SetPosX, float SetPosY, float Radius, float SizeY, int R, int G, int B)
+    void circle(float SetPosX, float SetPosY, float Radius, int R, int G, int B)
     {
         sf::CircleShape circle;
         circle.setPosition(SetPosX, SetPosY);
@@ -53,9 +83,9 @@ public:
         sf::Font font;
         sf::Text text;
 
-        if(!font.loadFromFile(TTF))
+        if(!font.loadFromFile(TTF + ".ttf"))
         {
-            std::cout << "error: " << TTF << " could not be found" << std::endl;
+            std::cout << "error: " << TTF << ".ttf could not be found" << std::endl;
         }
 
         text.setFont(font);
@@ -64,16 +94,45 @@ public:
         text.setFillColor(sf::Color(R, G, B));
         window.draw(text);
     }
+
+    void  camera(float charaPosX, float charaPosY)
+    {
+        sf::View view;
+        view.reset(sf::FloatRect(0, 0, WindowX, WindowY));
+        view.setViewport(sf::FloatRect(0, 0, 1.0f, 1.0f));
+
+        sf::Vector2f CamPosition(0, 0);
+
+        CamPosition.x = charaPosX;
+        CamPosition.y = charaPosY;
+
+            view.move(0, 0);
+
+        window.setView(view);
+    }
+
+    void sprite(std::string fileName, float SpritePosX, float SpritePosY)
+    {
+        sf::Texture texture;
+        sf::Sprite sprite;
+
+        if(!texture.loadFromFile(fileName))
+        {
+            std::cout << "Error file not found" << std::endl;
+        }
+
+        sprite.setTexture(texture);
+        sprite.setPosition(SpritePosX, SpritePosY);
+        window.draw(sprite);
+    }
 };
 
-
-
-
-
-/*---------------------- main ------------------------------------*/
+/*---------------------- int main ------------------------------------*/
 
 int main()
 {
+
+
     window.setFramerateLimit(60);
     enum PGame{mainScreen, level_01};
     //creates the window size and gives the window a name
@@ -112,6 +171,9 @@ int main()
     //end of the button creation
 
     bool MouseButtonPressed = false;
+
+/*------------------------ title window ---------------------------*/
+
     while (window.isOpen())
     {
        //this gets the coordinates of top left corner of the text
@@ -170,6 +232,7 @@ int main()
         //end of finding the exact position of the button
         window.clear();
         //this draws shape title and button to the window
+
         window.draw(shape);
         window.draw(title);
         window.draw(text);
@@ -186,9 +249,11 @@ int main()
     float velocityX = 0, velocityY = 0; // sets the velocity
     float accelerationX = 0, accelerationY = 0; // sets the acceleration
 
-    float gravity = 1;
+    float gravity = 1.5;
 
-    float boxSetX = 100, boxSetY = 500; // sets the position of the box
+    float MasterPosY = 485;
+
+    float boxSetX = 100, boxSetY = MasterPosY; // sets the position of the box
 
     float characterBottom;
 
@@ -229,6 +294,7 @@ int level_1()
     object *boxA;
     object *boxB;
     object *boxC;
+    object *Camera;
 
     while(window.isOpen())
     {
@@ -238,6 +304,17 @@ int level_1()
 
     float characterPosX = character.getPosition().x;
     float characterPosY = character.getPosition().y;
+
+    std::cout << characterPosX << " " << characterPosY << std::endl;
+
+    detection TBox;
+
+     bool loadLevel_2 = TBox.triggerBox(characterPosX, characterPosY, 400, 400, 600, 600);
+
+     if(loadLevel_2 == true )
+     {
+         level_2();
+     }
 
     BoxPosX =  rect.getPosition().x;
     BoxPosY = rect.getPosition().y;
@@ -262,7 +339,7 @@ int level_1()
 
 
 
-    std::cout << BoxPosX << " " << BoxPosY << std::endl;
+    //std::cout << BoxPosX << " " << BoxPosY << std::endl;
 
     // to get the position of the mouse
     sf::Vector2i d_mouse = sf::Mouse::getPosition(window);
@@ -277,7 +354,7 @@ int level_1()
                 window.close();
 
             // the jumping mechanism
-            if((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) && MAX_Jump == false)
+            if(((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W)) && MAX_Jump == false)
             {
                 velocityY = -20;
                 jumpcount += 0;
@@ -302,24 +379,19 @@ int level_1()
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::D) )
         {
             velocityX = 0;
-            button = true;
         }
         if(!sf::Keyboard::isKeyPressed(sf::Keyboard::A) )
         {
             velocityX = 0;
-            button = true;
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) )
         {
-            velocityX = 4;
-            button = true;
+            velocityX = 5;
         }
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
-            velocityX = -4;
-            button = true;
-
+            velocityX = -5;
         }
         /*if((sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::S)))
         {
@@ -333,13 +405,21 @@ int level_1()
 
         //end of ground
         updateMovemnet();
+        //::cout << moveX << " " << moveY << std::endl;
         character.setPosition(moveX, moveY);
         //gravity(character);
 
         window.clear();
         boxA->box(0, 0, 800, 600, 244, 200, 155);   // tan
         boxB->box(0, 500, 800, 200, 45, 155, 130);  // dark green
-        boxC->box(0, 575, 800, 200, 45, 190, 130);  // bright green
+        boxC->box(0, 575, 800, 200, 45, 190, 130);
+        object *circle;
+        circle->circle(550, 70, 40.f, 255, 0, 0 );  // bright green
+        object *cloud;
+
+        cloud->sprite("cloud.png", 50, 90);
+        cloud->sprite("cloud.png", 200, 90);
+        //Camera->camera();
         window.draw(character);
         //window.draw(rect);
         window.display();
@@ -363,9 +443,9 @@ void updateMovemnet()
     if(moveY < BoxPosY )                  //If you are above ground
         velocityY += gravity;    //Add gravity
      else if(moveY > BoxPosY)             //If you are below ground
-        moveY = 500;
+        moveY = MasterPosY;
 
-    std::cout << boxSetY << " " << moveY << std::endl;
+    //std::cout << boxSetY << " " << moveY << std::endl;
 
 
 }
@@ -381,7 +461,7 @@ void jumpcounter()
 
     // gets jump count 1 from spacebar
 
-    float num = 500.f;
+    float num = MasterPosY;
 
 
     if(jumpcount == 0)
@@ -400,10 +480,25 @@ void jumpcounter()
 
                 if( touchground == true && isJumping == false)
                 {
-                            std::cout << "Yaaaaaaay" << std::endl;
+                            //std::cout << "Yaaaaaaay" << std::endl;
                             jumpcount = 0;
-
                 }
+    }
+}
+
+/*----------------------- Level 2 ---------------------------*/
+
+int level_2()
+{
+    while (window.isOpen())
+    {
+        while (window.pollEvent(event))
+        {
+
+        }
+        window.clear();
+
+        window.display();
     }
 }
 
