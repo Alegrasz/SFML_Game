@@ -12,3 +12,4 @@
 - [ ] be able to change screen resolution
 - [ ] weapons menu?
 - [ ] diagnol stairs that the player can walk in a diagnol path
+- [ ] ai with detection and jumping capabilties
